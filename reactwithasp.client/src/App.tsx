@@ -1,58 +1,97 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-interface Forecast {
-    date: string;
-    temperatureC: number;
-    temperatureF: number;
-    summary: string;
+interface Todo {
+    id: string;
+    title: string;
+    isComplete: boolean;
+    createdAt: string;
 }
 
 function App() {
-    const [forecasts, setForecasts] = useState<Forecast[]>();
+    const [todos, setTodos] = useState<Todo[]>([]);
+    const [newTodoTitle, setNewTodoTitle] = useState('');
 
     useEffect(() => {
-        populateWeatherData();
+        fetchTodos();
     }, []);
 
-    const contents = forecasts === undefined
-        ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        : <table className="table table-striped" aria-labelledby="tableLabel">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Temp. (C)</th>
-                    <th>Temp. (F)</th>
-                    <th>Summary</th>
-                </tr>
-            </thead>
-            <tbody>
-                {forecasts.map(forecast =>
-                    <tr key={forecast.date}>
-                        <td>{forecast.date}</td>
-                        <td>{forecast.temperatureC}</td>
-                        <td>{forecast.temperatureF}</td>
-                        <td>{forecast.summary}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>;
+    const fetchTodos = async () => {
+        console.log('Fetching todos...');
+        try {
+            const response = await fetch('/api/todo');
+            console.log('Fetch response status:', response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched todos:', data);
+                setTodos(data);
+            } else {
+                console.error('Failed to fetch todos:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching todos:', error);
+        }
+    };
+
+    const addTodo = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newTodoTitle.trim()) return;
+        
+        console.log('Attempting to add todo:', { title: newTodoTitle });
+        
+        try {
+            const response = await fetch('/api/todo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: newTodoTitle,
+                    isComplete: false
+                })
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log('Response data:', responseData);
+                setNewTodoTitle('');
+                fetchTodos();
+            } else {
+                console.error('Failed to add todo:', response.statusText);
+                const errorText = await response.text();
+                console.error('Error details:', errorText);
+            }
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        }
+    };
 
     return (
-        <div>
-            <h1 id="tableLabel">Weather forecast</h1>
-            <p>This component demonstrates fetching data from the server.</p>
-            {contents}
+        <div className="container">
+            <h1>Todo List</h1>
+            
+            <form onSubmit={addTodo} className="add-todo-form">
+                <input
+                    type="text"
+                    value={newTodoTitle}
+                    onChange={(e) => setNewTodoTitle(e.target.value)}
+                    placeholder="Enter new todo..."
+                />
+                <button type="submit">Add Todo</button>
+            </form>
+
+            <ul className="todo-list">
+                {todos.map(todo => (
+                    <li key={todo.id} className={todo.isComplete ? 'completed' : ''}>
+                        <span>{todo.title}</span>
+                        <small>{new Date(todo.createdAt).toLocaleDateString()}</small>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
-
-    async function populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        if (response.ok) {
-            const data = await response.json();
-            setForecasts(data);
-        }
-    }
 }
 
 export default App;

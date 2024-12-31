@@ -19,6 +19,10 @@ env:
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
   WORKING_DIRECTORY: ReactWithASP.Server
+  # My edit START
+  COSMOS_ENDPOINT_URI: ${{ secrets.COSMOS_ENDPOINT_URI }}
+  COSMOS_PRIMARY_KEY: ${{ secrets.COSMOS_PRIMARY_KEY }}
+  # My edit END
 jobs:
   build:
     runs-on: windows-latest
@@ -50,6 +54,14 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    # My edit
+    - name: Update appsettings.json
+      run: |
+        $settings = Get-Content '.\ReactWithASP.Server\appsettings.json' | ConvertFrom-Json
+        $settings.CosmosDb.EndpointUri = "${{ env.COSMOS_ENDPOINT_URI }}"
+        $settings.CosmosDb.PrimaryKey = "${{ env.COSMOS_PRIMARY_KEY }}"
+        $settings | ConvertTo-Json -Depth 10 | Set-Content '.\ReactWithASP.Server\appsettings.json'
+    # My edit END
   deploy:
     runs-on: windows-latest
     needs: build

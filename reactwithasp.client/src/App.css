@@ -9,3 +9,70 @@ th, td {
     padding-left: 1rem;
     padding-right: 1rem;
 }
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.add-todo-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.add-todo-form input {
+    flex: 1;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.add-todo-form button {
+    padding: 8px 16px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+.todo-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    color: #333;
+}
+
+.todo-list li.completed {
+    background-color: #e0e0e0;
+    text-decoration: line-through;
+}
+
+.todo-list small {
+    color: #666;
+}
+
+@media (prefers-color-scheme: dark) {
+    .todo-list li {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    .todo-list small {
+        color: #aaa;
+    }
+
+    .todo-list li.completed {
+        background-color: #1a1a1a;
+    }
+}
