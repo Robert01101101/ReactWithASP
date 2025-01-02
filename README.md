@@ -1,5 +1,7 @@
 # ReactWithASP
 
+[View Hosted App](https://reactwithaspserver20241228211727.azurewebsites.net/)
+
 A project to practice the development of Single Page Apps (SPA) with ASP.NET Core API + React, as well as TypeScript.
 
  ## Stack
@@ -13,3 +15,7 @@ A project to practice the development of Single Page Apps (SPA) with ASP.NET Cor
  ### Creation
 
  Created with the Visual Studio `React and ASP.NET Core (TS)` template. Project creation details based on [Tutorial: Create an ASP.NET Core app with React in Visual Studio](https://learn.microsoft.com/en-us/visualstudio/javascript/tutorial-asp-net-core-with-react?view=vs-2022).
+
+ ### Notes
+
+ [GDoc](https://docs.google.com/document/d/1aLu8pfwMafERf6gfbknh_8lAZH17xiVm5Q6fB9fNUbA/edit?usp=sharing)
