@@ -22,7 +22,7 @@ namespace ReactWithASP.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var items = await _cosmosDbService.GetItemsAsync();
+            IEnumerable<ToDoItem> items = await _cosmosDbService.GetItemsAsync();
             return Ok(items);
         }
 
@@ -41,6 +41,22 @@ namespace ReactWithASP.Server.Controllers
             {
                 _logger.LogError(ex, "Error adding todo item");
                 return StatusCode(500, "Error adding todo item");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try 
+            {
+                await _cosmosDbService.DeleteItemAsync(id);
+                _logger.LogInformation("Successfully deleted item with ID: {Id}", id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting todo item");
+                return StatusCode(500, "Error deleting todo item");
             }
         }
     }

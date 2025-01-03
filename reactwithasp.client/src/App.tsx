@@ -1,95 +1,63 @@
 import { useEffect, useState } from 'react';
+import { Todo } from './types/Todo';
+import { todoService } from './services/todoService';
+import { TodoList } from './components/TodoList';
+import { TodoForm } from './components/TodoForm';
 import './App.css';
-
-interface Todo {
-    id: string;
-    title: string;
-    isComplete: boolean;
-    createdAt: string;
-}
 
 function App() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [newTodoTitle, setNewTodoTitle] = useState('');
 
     useEffect(() => {
+        //call here, because calling in the body would cause a loop
+        //fetchTodos sets state at the end, which causes a re-render, which would call fetchTodos again if it was in the body
         fetchTodos();
     }, []);
 
     const fetchTodos = async () => {
-        console.log('Fetching todos...');
         try {
-            const response = await fetch('/api/todo');
-            console.log('Fetch response status:', response.status);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Fetched todos:', data);
-                setTodos(data);
-            } else {
-                console.error('Failed to fetch todos:', response.statusText);
-            }
+            const data = await todoService.fetchTodos();
+            setTodos(data);
         } catch (error) {
             console.error('Error fetching todos:', error);
         }
     };
 
-    const addTodo = async (e: React.FormEvent) => {
+    const handleAddTodo = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTodoTitle.trim()) return;
         
-        console.log('Attempting to add todo:', { title: newTodoTitle });
-        
         try {
-            const response = await fetch('/api/todo', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title: newTodoTitle,
-                    isComplete: false
-                })
-            });
-            
-            console.log('Response status:', response.status);
-            
-            if (response.ok) {
-                const responseData = await response.json();
-                console.log('Response data:', responseData);
-                setNewTodoTitle('');
-                fetchTodos();
-            } else {
-                console.error('Failed to add todo:', response.statusText);
-                const errorText = await response.text();
-                console.error('Error details:', errorText);
-            }
+            await todoService.addTodo(newTodoTitle);
+            setNewTodoTitle('');
+            fetchTodos();
         } catch (error) {
             console.error('Error adding todo:', error);
+        }
+    };
+
+    const handleDeleteTodo = async (id: string) => {
+        try {
+            await todoService.deleteTodo(id);
+            fetchTodos();
+        } catch (error) {
+            console.error('Error deleting todo:', error);
         }
     };
 
     return (
         <div className="container">
             <h1>Todo List</h1>
-            
-            <form onSubmit={addTodo} className="add-todo-form">
-                <input
-                    type="text"
-                    value={newTodoTitle}
-                    onChange={(e) => setNewTodoTitle(e.target.value)}
-                    placeholder="Enter new todo..."
-                />
-                <button type="submit">Add Todo</button>
-            </form>
-
-            <ul className="todo-list">
-                {todos.map(todo => (
-                    <li key={todo.id} className={todo.isComplete ? 'completed' : ''}>
-                        <span>{todo.title}</span>
-                        <small>{new Date(todo.createdAt).toLocaleDateString()}</small>
-                    </li>
-                ))}
-            </ul>
+            <TodoForm
+                value={newTodoTitle}
+                onChange={setNewTodoTitle}
+                onSubmit={handleAddTodo}
+            />
+            <TodoList 
+                todos={todos}
+                onDelete={handleDeleteTodo}
+            />
         </div>
     );
 }

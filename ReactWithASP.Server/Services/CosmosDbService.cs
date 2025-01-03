@@ -62,5 +62,24 @@ namespace ReactWithASP.Server.Services
                 throw;
             }
         }
+
+        public async Task DeleteItemAsync(string id)
+        {
+            try 
+            {
+                await _container.DeleteItemAsync<ToDoItem>(id, new PartitionKey(id));
+            }
+            catch (CosmosException ex)
+            {
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}", 
+                    ex.Message, ex.StatusCode);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "General Error: {Message}", ex.Message);
+                throw;
+            }
+        }
     }
 }
