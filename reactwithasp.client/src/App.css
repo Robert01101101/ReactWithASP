@@ -105,3 +105,223 @@ th, td {
         background-color: #a71d2a;
     }
 }
+
+.add-scan-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-input {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-textarea {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-file-input {
+    padding: 8px;
+    font-size: 16px;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    align-self: flex-end;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+@media (prefers-color-scheme: dark) {
+    .add-scan-form {
+        background-color: #2a2a2a;
+    }
+
+    .form-input,
+    .form-textarea {
+        background-color: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+        color: #888;
+    }
+}
+
+.scan-list {
+    list-style: none;
+    padding: 0;
+}
+
+.scan-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #333;
+}
+
+.scan-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    gap: 5px;
+}
+
+.scan-content h3 {
+    margin: 0;
+    color: #0066cc;
+}
+
+.scan-content .subject {
+    font-weight: 500;
+    margin: 0;
+}
+
+.scan-content .description {
+    margin: 5px 0;
+    color: #666;
+}
+
+.scan-content a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.scan-content a:hover {
+    text-decoration: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+    .scan-list li {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    .scan-content h3 {
+        color: #66b3ff;
+    }
+
+    .scan-content .description {
+        color: #aaa;
+    }
+
+    .scan-content a {
+        color: #66b3ff;
+    }
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.modules-wrapper {
+    display: grid;
+    grid-template-areas:
+        "todo-form scan-form"
+        "todo-list scan-list";
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.module {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+/* Assign grid areas */
+.module:nth-child(1) { grid-area: todo-form; }
+.module:nth-child(2) { grid-area: scan-form; }
+.module:nth-child(3) { grid-area: todo-list; }
+.module:nth-child(4) { grid-area: scan-list; }
+
+/* Make forms equal height */
+.form-module {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-todo-form,
+.add-scan-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Keep existing form styles */
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+    .modules-wrapper {
+        grid-template-areas:
+            "todo-form"
+            "todo-list"
+            "scan-form"
+            "scan-list";
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .module {
+        background-color: #2a2a2a;
+    }
+
+    .form-input,
+    .form-textarea {
+        background-color: #333;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+}

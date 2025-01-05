@@ -1,20 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Todo } from './types/Todo';
+import { Scan } from './types/Scan';
 import { todoService } from './services/todoService';
+import { scanService } from './services/scanService';
 import { TodoList } from './components/TodoList';
 import { TodoForm } from './components/TodoForm';
+import { ScanList } from './components/ScanList';
+import { ScanForm } from './components/ScanForm';
 import './App.css';
 
 function App() {
+    // Todo state
     const [todos, setTodos] = useState<Todo[]>([]);
     const [newTodoTitle, setNewTodoTitle] = useState('');
 
+    // Scan state
+    const [scans, setScans] = useState<Scan[]>([]);
+    const [newScan, setNewScan] = useState({
+        title: '',
+        subject: '',
+        description: ''
+    });
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
     useEffect(() => {
-        //call here, because calling in the body would cause a loop
-        //fetchTodos sets state at the end, which causes a re-render, which would call fetchTodos again if it was in the body
         fetchTodos();
+        //fetchScans();
     }, []);
 
+    // Todo handlers
     const fetchTodos = async () => {
         try {
             const data = await todoService.fetchTodos();
@@ -46,18 +60,86 @@ function App() {
         }
     };
 
+    // Scan handlers
+    const fetchScans = async () => {
+        try {
+            const data = await scanService.fetchScans();
+            setScans(data);
+        } catch (error) {
+            console.error('Error fetching scans:', error);
+        }
+    };
+
+    const handleAddScan = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newScan.title.trim()) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('title', newScan.title);
+            formData.append('subject', newScan.subject);
+            formData.append('description', newScan.description);
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            }
+
+            await scanService.addScan(formData);
+            setNewScan({ title: '', subject: '', description: '' });
+            setSelectedFile(null);
+            fetchScans();
+        } catch (error) {
+            console.error('Error adding scan:', error);
+        }
+    };
+
+    const handleDeleteScan = async (id: string) => {
+        try {
+            await scanService.deleteScan(id);
+            fetchScans();
+        } catch (error) {
+            console.error('Error deleting scan:', error);
+        }
+    };
+
     return (
-        <div className="container">
-            <h1>Todo List</h1>
-            <TodoForm
-                value={newTodoTitle}
-                onChange={setNewTodoTitle}
-                onSubmit={handleAddTodo}
-            />
-            <TodoList 
-                todos={todos}
-                onDelete={handleDeleteTodo}
-            />
+        <div className="app-container">
+            <div className="modules-wrapper">
+                <div className="module form-module">
+                    <h2>New Todo</h2>
+                    <TodoForm
+                        value={newTodoTitle}
+                        onChange={setNewTodoTitle}
+                        onSubmit={handleAddTodo}
+                    />
+                </div>
+                <div className="module form-module">
+                    <h2>New Scan</h2>
+                    <ScanForm
+                        title={newScan.title}
+                        subject={newScan.subject}
+                        description={newScan.description}
+                        onTitleChange={(value) => setNewScan({ ...newScan, title: value })}
+                        onSubjectChange={(value) => setNewScan({ ...newScan, subject: value })}
+                        onDescriptionChange={(value) => setNewScan({ ...newScan, description: value })}
+                        onFileChange={setSelectedFile}
+                        onSubmit={handleAddScan}
+                    />
+                </div>
+                <div className="module list-module">
+                    <h2>Todo List</h2>
+                    <TodoList 
+                        todos={todos}
+                        onDelete={handleDeleteTodo}
+                    />
+                </div>
+                <div className="module list-module">
+                    <h2>Scan List</h2>
+                    <ScanList 
+                        scans={scans}
+                        onDelete={handleDeleteScan}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

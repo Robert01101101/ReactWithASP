@@ -49,11 +49,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton(sp =>
+builder.Services.AddSingleton<ICosmosDbService>(sp =>
 {
-    var configuration = sp.GetService<IConfiguration>() ?? 
-        throw new InvalidOperationException("Configuration not found");
-        
+    IConfiguration configuration = sp.GetRequiredService<IConfiguration>();
     var endpointUri = configuration["CosmosDb:EndpointUri"] ?? 
         throw new InvalidOperationException("CosmosDB EndpointUri not found in configuration");
     var primaryKey = configuration["CosmosDb:PrimaryKey"] ?? 
@@ -61,13 +59,26 @@ builder.Services.AddSingleton(sp =>
     
     var cosmosClient = new CosmosClient(endpointUri, primaryKey);
     
-    var databaseName = configuration["CosmosDb:DatabaseName"] ?? 
-        throw new InvalidOperationException("CosmosDB DatabaseName not found in configuration");
-    var containerName = configuration["CosmosDb:ContainerName"] ?? 
-        throw new InvalidOperationException("CosmosDB ContainerName not found in configuration");
+    // Todo database config
+    var todoDatabaseName = configuration["CosmosDb:Databases:Todo:Name"] ?? 
+        throw new InvalidOperationException("Todo DatabaseName not found in configuration");
+    var todoContainerName = configuration["CosmosDb:Databases:Todo:ContainerName"] ?? 
+        throw new InvalidOperationException("Todo ContainerName not found in configuration");
+
+    // Scan database config
+    var scanDatabaseName = configuration["CosmosDb:Databases:Scan:Name"] ?? 
+        throw new InvalidOperationException("Scan DatabaseName not found in configuration");
+    var scanContainerName = configuration["CosmosDb:Databases:Scan:ContainerName"] ?? 
+        throw new InvalidOperationException("Scan ContainerName not found in configuration");
         
-    return new CosmosDbService(cosmosClient, databaseName, containerName, 
-        sp.GetRequiredService<ILogger<CosmosDbService>>());
+    return new CosmosDbService(
+        cosmosClient, 
+        todoDatabaseName, 
+        todoContainerName,
+        scanDatabaseName,
+        scanContainerName,
+        sp.GetRequiredService<ILogger<CosmosDbService>>()
+    );
 });
 
 var app = builder.Build();
