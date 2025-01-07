@@ -7,28 +7,20 @@ interface ScanListProps {
 
 export function ScanList({ scans, onDelete }: ScanListProps) {
     return (
-        <ul className="scan-list">
+        <div className="scan-list">
             {scans.map(scan => (
-                <li key={scan.id}>
-                    <div className="scan-content">
-                        <h3>{scan.title}</h3>
-                        <p className="subject">{scan.subject}</p>
-                        <p className="description">{scan.description}</p>
-                        {scan.fileUrl && (
-                            <a href={scan.fileUrl} target="_blank" rel="noopener noreferrer">
-                                View File
-                            </a>
-                        )}
-                        <small>{new Date(scan.createdAt).toLocaleDateString()}</small>
-                    </div>
-                    <button 
-                        onClick={() => onDelete(scan.id)}
-                        className="delete-button"
-                    >
-                        Delete
-                    </button>
-                </li>
+                <div key={scan.id} className="scan-item">
+                    <h3>{scan.title}</h3>
+                    <p>Subject: {scan.subject}</p>
+                    <p>{scan.description}</p>
+                    {scan.blobUrl && (
+                        <a href={scan.blobUrl} target="_blank" rel="noopener noreferrer">
+                            Download Model Files
+                        </a>
+                    )}
+                    <button onClick={() => onDelete(scan.id)}>Delete</button>
+                </div>
             ))}
-        </ul>
+        </div>
     );
 } 

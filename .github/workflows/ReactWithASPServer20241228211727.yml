@@ -22,6 +22,7 @@ env:
   # My edit START
   COSMOS_ENDPOINT_URI: ${{ secrets.COSMOS_ENDPOINT_URI }}
   COSMOS_PRIMARY_KEY: ${{ secrets.COSMOS_PRIMARY_KEY }}
+  AZURE_BLOB_CONNECTION_STRING: ${{ secrets.AZURE_BLOB_CONNECTION_STRING }}
   # My edit END
 jobs:
   build:
@@ -60,6 +61,7 @@ jobs:
         $settings = Get-Content '.\ReactWithASP.Server\appsettings.json' | ConvertFrom-Json
         $settings.CosmosDb.EndpointUri = "${{ env.COSMOS_ENDPOINT_URI }}"
         $settings.CosmosDb.PrimaryKey = "${{ env.COSMOS_PRIMARY_KEY }}"
+        $settings.BlobStorage.ConnectionString = "${{ env.AZURE_BLOB_CONNECTION_STRING }}"
         $settings | ConvertTo-Json -Depth 10 | Set-Content '.\ReactWithASP.Server\appsettings.json'
     # My edit END
   deploy:
