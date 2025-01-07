@@ -91,7 +91,7 @@ namespace ReactWithASP.Server.Services
         {
             try
             {
-                item.Id = item.Id?.ToLowerInvariant() ?? Guid.NewGuid().ToString().ToLowerInvariant();
+                item.Id = Guid.NewGuid().ToString().ToLowerInvariant();
                 item.CreatedAt = DateTime.UtcNow;
 
                 _logger.LogInformation("Creating scan item with ID: {Id}", item.Id);
@@ -112,6 +112,25 @@ namespace ReactWithASP.Server.Services
             try
             {
                 await _scanContainer.DeleteItemAsync<ScanItem>(id, new PartitionKey(id));
+            }
+            catch (CosmosException ex)
+            {
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}",
+                    ex.Message, ex.StatusCode);
+                throw;
+            }
+        }
+
+        public async Task<ScanItem?> GetScanItemAsync(string id)
+        {
+            try
+            {
+                var response = await _scanContainer.ReadItemAsync<ScanItem>(id, new PartitionKey(id));
+                return response.Resource;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
             }
             catch (CosmosException ex)
             {

@@ -5,18 +5,18 @@ interface ScanFormProps {
     onTitleChange: (value: string) => void;
     onSubjectChange: (value: string) => void;
     onDescriptionChange: (value: string) => void;
-    onFileChange: (file: File | null) => void;
+    onFilesChange: (files: FileList | null) => void;
     onSubmit: (e: React.FormEvent) => void;
 }
 
 export function ScanForm({ 
-    title, 
+    title,
     subject,
     description,
     onTitleChange,
     onSubjectChange,
     onDescriptionChange,
-    onFileChange,
+    onFilesChange,
     onSubmit 
 }: ScanFormProps) {
     return (
@@ -28,6 +28,7 @@ export function ScanForm({
                     onChange={(e) => onTitleChange(e.target.value)}
                     placeholder="Enter title..."
                     className="form-input"
+                    required
                 />
                 <input
                     type="text"
@@ -35,6 +36,7 @@ export function ScanForm({
                     onChange={(e) => onSubjectChange(e.target.value)}
                     placeholder="Enter subject..."
                     className="form-input"
+                    required
                 />
                 <textarea
                     value={description}
@@ -42,13 +44,21 @@ export function ScanForm({
                     placeholder="Enter description..."
                     className="form-input form-textarea"
                 />
-                <input
-                    type="file"
-                    onChange={(e) => onFileChange(e.target.files ? e.target.files[0] : null)}
-                    className="form-file-input"
-                />
+                <div className="file-upload-section">
+                    <input
+                        type="file"
+                        onChange={(e) => onFilesChange(e.target.files)}
+                        multiple
+                        accept=".obj,.mtl,.png,.jpg,.jpeg"
+                        className="form-file-input"
+                        required
+                    />
+                    <small className="file-help-text">
+                        Upload OBJ file (required), MTL file and texture files (optional)
+                    </small>
+                </div>
             </div>
-            <button type="submit" className="submit-button">Add Scan</button>
+            <button type="submit" className="submit-button">Upload Model</button>
         </form>
     );
 } 

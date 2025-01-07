@@ -21,11 +21,11 @@ function App() {
         subject: '',
         description: ''
     });
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
     useEffect(() => {
         fetchTodos();
-        //fetchScans();
+        fetchScans();
     }, []);
 
     // Todo handlers
@@ -79,13 +79,17 @@ function App() {
             formData.append('title', newScan.title);
             formData.append('subject', newScan.subject);
             formData.append('description', newScan.description);
-            if (selectedFile) {
-                formData.append('file', selectedFile);
+            
+            // Add all selected files to the FormData
+            if (selectedFiles) {
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    formData.append('files', selectedFiles[i]);
+                }
             }
 
             await scanService.addScan(formData);
             setNewScan({ title: '', subject: '', description: '' });
-            setSelectedFile(null);
+            setSelectedFiles(null);
             fetchScans();
         } catch (error) {
             console.error('Error adding scan:', error);
@@ -121,7 +125,7 @@ function App() {
                         onTitleChange={(value) => setNewScan({ ...newScan, title: value })}
                         onSubjectChange={(value) => setNewScan({ ...newScan, subject: value })}
                         onDescriptionChange={(value) => setNewScan({ ...newScan, description: value })}
-                        onFileChange={setSelectedFile}
+                        onFilesChange={(files) => setSelectedFiles(files)}
                         onSubmit={handleAddScan}
                     />
                 </div>

@@ -58,6 +58,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddSingleton<ICosmosDbService>(sp =>
 {
     IConfiguration configuration = sp.GetRequiredService<IConfiguration>();

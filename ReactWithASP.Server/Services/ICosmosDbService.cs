@@ -10,5 +10,6 @@ namespace ReactWithASP.Server.Services
         Task<IEnumerable<ScanItem>> GetScanItemsAsync();
         Task AddScanItemAsync(ScanItem item);
         Task DeleteScanItemAsync(string id);
+        Task<ScanItem?> GetScanItemAsync(string id);
     }
 } 

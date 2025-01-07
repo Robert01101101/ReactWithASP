@@ -3,6 +3,7 @@ export interface Scan {
     title: string;
     subject: string;
     description: string;
-    fileUrl: string | null; //nullable
+    blobUrl: string | null;
+    originalFileName: string | null;
     createdAt: string;
 }

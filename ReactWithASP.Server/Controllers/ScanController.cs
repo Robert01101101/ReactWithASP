@@ -10,11 +10,13 @@ namespace ReactWithASP.Server.Controllers
     public class ScanController : ControllerBase
     {
         private readonly ICosmosDbService _cosmosDbService;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<ScanController> _logger;
 
-        public ScanController(ICosmosDbService cosmosDbService, ILogger<ScanController> logger)
+        public ScanController(ICosmosDbService cosmosDbService, IBlobStorageService blobStorageService, ILogger<ScanController> logger)
         {
             _cosmosDbService = cosmosDbService;
+            _blobStorageService = blobStorageService;
             _logger = logger;
         }
 
@@ -26,35 +28,57 @@ namespace ReactWithASP.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ScanItem item)
+        public async Task<IActionResult> Post([FromForm] IFormCollection form)
         {
-            _logger.LogInformation("Received POST request with scan item: {@Item}", item);
-            try 
+            try
             {
-                await _cosmosDbService.AddScanItemAsync(item);
-                _logger.LogInformation("Successfully added scan item with ID: {Id}", item.Id);
-                return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
+                // Validate required files
+                if (!form.Files.Any(f => Path.GetExtension(f.FileName).ToLower() == ".obj"))
+                {
+                    return BadRequest("An OBJ file is required");
+                }
+
+                // Upload files to blob storage
+                string blobUrl = await _blobStorageService.UploadModelFilesAsync(form.Files);
+
+                // Create scan item
+                var scanItem = new ScanItem
+                {
+                    Title = form["title"],
+                    Subject = form["subject"],
+                    Description = form["description"],
+                    BlobUrl = blobUrl,
+                    OriginalFileName = form.Files.First(f => Path.GetExtension(f.FileName).ToLower() == ".obj").FileName
+                };
+
+                await _cosmosDbService.AddScanItemAsync(scanItem);
+                return CreatedAtAction(nameof(Get), new { id = scanItem.Id }, scanItem);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding scan item");
-                return StatusCode(500, "Error adding scan item");
+                _logger.LogError(ex, "Error processing scan upload");
+                return StatusCode(500, "Error processing scan upload");
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            try 
+            try
             {
+                // Get the scan item to get its blob URL
+                var scan = await _cosmosDbService.GetScanItemAsync(id);
+                if (scan?.BlobUrl != null)
+                {
+                    await _blobStorageService.DeleteModelFilesAsync(scan.BlobUrl);
+                }
                 await _cosmosDbService.DeleteScanItemAsync(id);
-                _logger.LogInformation("Successfully deleted scan item with ID: {Id}", id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting scan item");
-                return StatusCode(500, "Error deleting scan item");
+                _logger.LogError(ex, "Error deleting scan");
+                return StatusCode(500, "Error deleting scan");
             }
         }
     }
