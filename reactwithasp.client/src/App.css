@@ -1,5 +1,6 @@
 ﻿#root {
-    max-width: 1280px;
+    width: 60%;
+    max-width: 100rem;
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
@@ -11,7 +12,6 @@ th, td {
 }
 
 .container {
-    max-width: 600px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -19,22 +19,11 @@ th, td {
 .add-todo-form {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .add-todo-form input {
     flex: 1;
     padding: 8px;
-    font-size: 16px;
-}
-
-.add-todo-form button {
-    padding: 8px 16px;
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 .todo-list {
@@ -110,9 +99,7 @@ th, td {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-bottom: 20px;
     background-color: #f8f9fa;
-    padding: 20px;
     border-radius: 8px;
 }
 
@@ -136,6 +123,7 @@ th, td {
     border-radius: 4px;
     min-height: 100px;
     resize: vertical;
+    font-family: sans-serif;
 }
 
 .form-file-input {
@@ -143,7 +131,7 @@ th, td {
     font-size: 16px;
 }
 
-.submit-button {
+button[type=submit] {
     padding: 10px 20px;
     background-color: #0066cc;
     color: white;
@@ -152,6 +140,7 @@ th, td {
     cursor: pointer;
     font-size: 16px;
     align-self: flex-end;
+    width: 100%;
 }
 
 .submit-button:hover {
@@ -244,7 +233,6 @@ th, td {
 }
 
 .app-container {
-    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -254,9 +242,8 @@ th, td {
     grid-template-areas:
         "todo-form scan-form"
         "todo-list scan-list";
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: calc(50% - 1rem) calc(50% - 1rem);
     gap: 2rem;
-    max-width: 1000px;
     margin: 0 auto;
 }
 
@@ -288,7 +275,6 @@ th, td {
 /* Keep existing form styles */
 .form-input,
 .form-textarea {
-    width: 100%;
     padding: 8px;
     font-size: 16px;
     border: 1px solid #ddd;
@@ -301,7 +287,15 @@ th, td {
 }
 
 /* Mobile layout */
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
+    #root {
+        max-width: 90%;
+        width: auto;
+    }    
+}
+
+/* Mobile layout */
+@media (max-width: 900px) {
     .modules-wrapper {
         grid-template-areas:
             "todo-form"

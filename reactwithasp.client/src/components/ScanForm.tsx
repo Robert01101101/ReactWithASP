@@ -40,7 +40,7 @@ export function ScanForm({
                     value={description}
                     onChange={(e) => onDescriptionChange(e.target.value)}
                     placeholder="Enter description..."
-                    className="form-textarea"
+                    className="form-input form-textarea"
                 />
                 <input
                     type="file"

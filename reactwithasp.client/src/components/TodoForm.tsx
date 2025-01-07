@@ -12,6 +12,7 @@ export function TodoForm({ value, onChange, onSubmit }: TodoFormProps) {
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="Enter new todo..."
+                className="form-input"
             />
             <button type="submit">Add Todo</button>
         </form>
