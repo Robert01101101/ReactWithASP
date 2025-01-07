@@ -10,10 +10,10 @@ namespace ReactWithASP.Server.Controllers
     [ApiController]
     public class ToDoController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly ICosmosDbService _cosmosDbService;
         private readonly ILogger<ToDoController> _logger;
 
-        public ToDoController(CosmosDbService cosmosDbService, ILogger<ToDoController> logger)
+        public ToDoController(ICosmosDbService cosmosDbService, ILogger<ToDoController> logger)
         {
             _cosmosDbService = cosmosDbService;
             _logger = logger;
@@ -22,8 +22,18 @@ namespace ReactWithASP.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            IEnumerable<ToDoItem> items = await _cosmosDbService.GetItemsAsync();
-            return Ok(items);
+            try
+            {
+                _logger.LogInformation("Starting GET request for todos");
+                IEnumerable<ToDoItem> items = await _cosmosDbService.GetTodoItemsAsync();
+                _logger.LogInformation("Successfully retrieved {Count} todos", items?.Count() ?? 0);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception occurred while fetching todos");
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
         }
 
         [HttpPost]
@@ -33,7 +43,7 @@ namespace ReactWithASP.Server.Controllers
             
             try 
             {
-                await _cosmosDbService.AddItemAsync(item);
+                await _cosmosDbService.AddTodoItemAsync(item);
                 _logger.LogInformation("Successfully added item with ID: {Id}", item.Id);
                 return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
             }
@@ -49,7 +59,7 @@ namespace ReactWithASP.Server.Controllers
         {
             try 
             {
-                await _cosmosDbService.DeleteItemAsync(id);
+                await _cosmosDbService.DeleteTodoItemAsync(id);
                 _logger.LogInformation("Successfully deleted item with ID: {Id}", id);
                 return NoContent();
             }

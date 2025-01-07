@@ -18,6 +18,15 @@ var loggerFactory = LoggerFactory.Create(builder =>
         .SetMinimumLevel(LogLevel.Information);
 });
 
+/*
+builder.Logging.AddDebug()
+    .AddConsole()
+    .SetMinimumLevel(LogLevel.Trace)
+    .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+    .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
+    .AddFilter("ReactWithASP.Server", LogLevel.Trace);
+*/
+
 var logger = loggerFactory.CreateLogger<Program>();
 
 // Add environment logging

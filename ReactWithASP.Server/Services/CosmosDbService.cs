@@ -1,13 +1,15 @@
 ﻿using Microsoft.Azure.Cosmos;
 using ReactWithASP.Server.Models;
+using System.Collections.Concurrent;
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 
 namespace ReactWithASP.Server.Services
 {
     public class CosmosDbService : ICosmosDbService
     {
-        private readonly Container _todoContainer;
-        private readonly Container _scanContainer;
+        private readonly Microsoft.Azure.Cosmos.Container _todoContainer;
+        private readonly Microsoft.Azure.Cosmos.Container _scanContainer;
         private readonly ILogger<CosmosDbService> _logger;
 
         public CosmosDbService(
@@ -39,21 +41,20 @@ namespace ReactWithASP.Server.Services
 
         public async Task AddTodoItemAsync(ToDoItem item)
         {
-            try 
+            try
             {
                 item.Id = item.Id?.ToLowerInvariant() ?? Guid.NewGuid().ToString().ToLowerInvariant();
                 item.CreatedAt = DateTime.UtcNow;
-                
+
                 _logger.LogInformation("Creating todo item with ID: {Id}", item.Id);
-                
+
                 var partitionKey = new PartitionKey(item.Id);
-                var itemRequestOptions = new ItemRequestOptions { EnableContentResponseOnWrite = true };
-                
-                await _todoContainer.CreateItemAsync(item, partitionKey, itemRequestOptions);
+                await _todoContainer.CreateItemAsync(item, partitionKey);
             }
-            catch (Exception ex)
+            catch (CosmosException ex)
             {
-                _logger.LogError(ex, "Error creating todo item");
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}",
+                    ex.Message, ex.StatusCode);
                 throw;
             }
         }
@@ -64,9 +65,10 @@ namespace ReactWithASP.Server.Services
             {
                 await _todoContainer.DeleteItemAsync<ToDoItem>(id, new PartitionKey(id));
             }
-            catch (Exception ex)
+            catch (CosmosException ex)
             {
-                _logger.LogError(ex, "Error deleting todo item");
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}",
+                    ex.Message, ex.StatusCode);
                 throw;
             }
         }
@@ -87,21 +89,20 @@ namespace ReactWithASP.Server.Services
 
         public async Task AddScanItemAsync(ScanItem item)
         {
-            try 
+            try
             {
                 item.Id = item.Id?.ToLowerInvariant() ?? Guid.NewGuid().ToString().ToLowerInvariant();
                 item.CreatedAt = DateTime.UtcNow;
-                
+
                 _logger.LogInformation("Creating scan item with ID: {Id}", item.Id);
-                
+
                 var partitionKey = new PartitionKey(item.Id);
-                var itemRequestOptions = new ItemRequestOptions { EnableContentResponseOnWrite = true };
-                
-                await _scanContainer.CreateItemAsync(item, partitionKey, itemRequestOptions);
+                await _scanContainer.CreateItemAsync(item, partitionKey);
             }
-            catch (Exception ex)
+            catch (CosmosException ex)
             {
-                _logger.LogError(ex, "Error creating scan item");
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}",
+                    ex.Message, ex.StatusCode);
                 throw;
             }
         }
@@ -112,9 +113,10 @@ namespace ReactWithASP.Server.Services
             {
                 await _scanContainer.DeleteItemAsync<ScanItem>(id, new PartitionKey(id));
             }
-            catch (Exception ex)
+            catch (CosmosException ex)
             {
-                _logger.LogError(ex, "Error deleting scan item");
+                _logger.LogError(ex, "Cosmos DB Error: {Message}, StatusCode: {StatusCode}",
+                    ex.Message, ex.StatusCode);
                 throw;
             }
         }
