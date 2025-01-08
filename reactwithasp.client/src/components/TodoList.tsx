@@ -10,7 +10,7 @@ export function TodoList({ todos, onDelete }: TodoListProps) {
         <ul className="todo-list">
             {todos.map(todo => (
                 <li key={todo.id} className={todo.isComplete ? 'completed' : ''}>
-                    <div className="todo-content">
+                    <div className="todo-item">
                         <span>{todo.title}</span>
                         <small>{new Date(todo.createdAt).toLocaleDateString()}</small>
                     </div>

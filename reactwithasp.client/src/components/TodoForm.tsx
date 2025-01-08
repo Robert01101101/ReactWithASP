@@ -7,12 +7,11 @@ interface TodoFormProps {
 export function TodoForm({ value, onChange, onSubmit }: TodoFormProps) {
     return (
         <form onSubmit={onSubmit} className="add-todo-form">
-            <input
-                type="text"
+            <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="Enter new todo..."
-                className="form-input"
+                className="form-input form-textarea"
             />
             <button type="submit">Add Todo</button>
         </form>

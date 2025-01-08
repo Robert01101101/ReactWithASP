@@ -11,11 +11,13 @@ th, td {
     padding-right: 1rem;
 }
 
-.container {
-    margin: 0 auto;
-    padding: 20px;
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
+/* ____________________________________ Todo Form ___________ */
 .add-todo-form {
     display: flex;
     gap: 10px;
@@ -26,6 +28,7 @@ th, td {
     padding: 8px;
 }
 
+/* ____________________________________ Todo List ___________ */
 .todo-list {
     list-style: none;
     padding: 0;
@@ -51,7 +54,7 @@ th, td {
     color: #666;
 }
 
-.todo-content {
+.todo-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -72,29 +75,7 @@ th, td {
     background-color: #c82333;
 }
 
-@media (prefers-color-scheme: dark) {
-    .todo-list li {
-        background-color: #2a2a2a;
-        color: #e0e0e0;
-    }
-
-    .todo-list small {
-        color: #aaa;
-    }
-
-    .todo-list li.completed {
-        background-color: #1a1a1a;
-    }
-
-    .delete-button {
-        background-color: #bd2130;
-    }
-    
-    .delete-button:hover {
-        background-color: #a71d2a;
-    }
-}
-
+/* ____________________________________ Scan Form ___________ */
 .add-scan-form {
     display: flex;
     flex-direction: column;
@@ -141,30 +122,14 @@ button[type=submit] {
     font-size: 16px;
     align-self: flex-end;
     width: 100%;
+    margin-top: auto;
 }
 
-.submit-button:hover {
+button[type=submit]:hover {
     background-color: #0056b3;
 }
 
-@media (prefers-color-scheme: dark) {
-    .add-scan-form {
-        background-color: #2a2a2a;
-    }
-
-    .form-input,
-    .form-textarea {
-        background-color: #333;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    .form-input::placeholder,
-    .form-textarea::placeholder {
-        color: #888;
-    }
-}
-
+/* ____________________________________ Scan List ___________ */
 .scan-list {
     list-style: none;
     padding: 0;
@@ -181,57 +146,17 @@ button[type=submit] {
     color: #333;
 }
 
-.scan-content {
+.scan-item {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
-    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.scan-content h3 {
-    margin: 0;
-    color: #0066cc;
+.scan-item h3 {
+    margin: .3rem 0;
 }
 
-.scan-content .subject {
-    font-weight: 500;
-    margin: 0;
-}
-
-.scan-content .description {
-    margin: 5px 0;
-    color: #666;
-}
-
-.scan-content a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-.scan-content a:hover {
-    text-decoration: underline;
-}
-
-@media (prefers-color-scheme: dark) {
-    .scan-list li {
-        background-color: #2a2a2a;
-        color: #e0e0e0;
-    }
-
-    .scan-content h3 {
-        color: #66b3ff;
-    }
-
-    .scan-content .description {
-        color: #aaa;
-    }
-
-    .scan-content a {
-        color: #66b3ff;
-    }
-}
-
+/* ____________________________________ App Container / Misc ___________ */
 .app-container {
     margin: 0 auto;
     padding: 2rem;
@@ -286,7 +211,7 @@ button[type=submit] {
     resize: vertical;
 }
 
-/* Mobile layout */
+/* ____________________________________ Mobile Layout ___________ */
 @media (max-width: 1400px) {
     #root {
         max-width: 90%;
@@ -294,7 +219,6 @@ button[type=submit] {
     }    
 }
 
-/* Mobile layout */
 @media (max-width: 900px) {
     .modules-wrapper {
         grid-template-areas:
@@ -306,8 +230,31 @@ button[type=submit] {
     }
 }
 
-/* Dark mode */
+/* ____________________________________ Dark Mode ___________ */
 @media (prefers-color-scheme: dark) {
+    .todo-list li,
+    .scan-list li {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+    }
+
+    .todo-list small {
+        color: #aaa;
+    }
+
+    .todo-list li.completed {
+        background-color: #1a1a1a;
+    }
+
+    .delete-button {
+        background-color: #bd2130;
+    }
+    
+    .delete-button:hover {
+        background-color: #a71d2a;
+    }
+
+    .add-scan-form,
     .module {
         background-color: #2a2a2a;
     }
@@ -317,5 +264,10 @@ button[type=submit] {
         background-color: #333;
         border-color: #444;
         color: #e0e0e0;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+        color: #888;
     }
 }

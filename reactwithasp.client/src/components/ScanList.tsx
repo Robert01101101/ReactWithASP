@@ -10,15 +10,17 @@ export function ScanList({ scans, onDelete }: ScanListProps) {
         <div className="scan-list">
             {scans.map(scan => (
                 <div key={scan.id} className="scan-item">
-                    <h3>{scan.title}</h3>
-                    <p>Subject: {scan.subject}</p>
+                    <div className="column">
+                        <h3>{scan.title}</h3>
+                        <small>Subject: {scan.subject}</small>
+                    </div>
                     <p>{scan.description}</p>
                     {scan.blobUrl && (
                         <a href={scan.blobUrl} target="_blank" rel="noopener noreferrer">
                             Download Model Files
                         </a>
                     )}
-                    <button onClick={() => onDelete(scan.id)}>Delete</button>
+                    <button onClick={() => onDelete(scan.id)} className="delete-button">Delete</button>
                 </div>
             ))}
         </div>
