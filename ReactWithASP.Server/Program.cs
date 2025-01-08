@@ -1,55 +1,64 @@
 using Microsoft.Azure.Cosmos;
 using ReactWithASP.Server.Services;
 using Microsoft.Extensions.Logging;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 
 //Config: To run locally, make sure Multiple startup projects is selected under solution properties, with action Start for both
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add logging configuration
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
-var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder
-        .AddConsole()
-        .AddDebug()
-        .SetMinimumLevel(LogLevel.Information);
-});
-
-/*
-builder.Logging.AddDebug()
-    .AddConsole()
-    .SetMinimumLevel(LogLevel.Trace)
-    .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
-    .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
-    .AddFilter("ReactWithASP.Server", LogLevel.Trace);
-*/
-
-var logger = loggerFactory.CreateLogger<Program>();
-
-// Add environment logging
-logger.LogInformation("=== Environment Information ===");
-logger.LogInformation("Current environment: {Environment}", builder.Environment.EnvironmentName);
-logger.LogInformation("Is Development: {IsDevelopment}", builder.Environment.IsDevelopment());
-logger.LogInformation("Content Root Path: {ContentRootPath}", builder.Environment.ContentRootPath);
-
-// Explicitly set environment if needed
+// Configure logging based on environment
 if (builder.Environment.IsDevelopment())
 {
-    logger.LogInformation("=== Loading Development Configuration ===");
-    builder.Configuration
-        .SetBasePath(builder.Environment.ContentRootPath)
-        .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
-        .AddEnvironmentVariables();
-    
-    // Log the configuration source
-    logger.LogInformation("Configuration files:");
-    foreach (var source in builder.Configuration.Sources)
+    // Development logging configuration
+    builder.Logging
+        .ClearProviders()
+        .AddDebug()
+        .AddConsole()
+        .SetMinimumLevel(LogLevel.Debug)
+        .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+        .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
+        .AddFilter("ReactWithASP.Server", LogLevel.Debug);
+
+    var loggerFactory = LoggerFactory.Create(builder =>
     {
-        logger.LogInformation("  - {Source}", source);
-    }
+        builder
+            .AddConsole()
+            .AddDebug()
+            .SetMinimumLevel(LogLevel.Information);
+    });
+
+    var logger = loggerFactory.CreateLogger<Program>();
+    logger.LogInformation("=== Environment Information ===");
+    logger.LogInformation("Current environment: {Environment}", builder.Environment.EnvironmentName);
+    logger.LogInformation("Content Root Path: {ContentRootPath}", builder.Environment.ContentRootPath);
+}
+else
+{
+    // Production logging with Azure Monitor Application Insights OpenTelemetry
+    builder.Services.AddOpenTelemetry()
+        .UseAzureMonitor()
+        .WithTracing(tracing =>
+        {
+            tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation();
+        })
+        .WithMetrics(metrics =>
+        {
+            metrics.AddAspNetCoreInstrumentation();
+        });
+
+    builder.Logging.AddOpenTelemetry(options =>
+    {
+        options.SetResourceBuilder(
+            ResourceBuilder.CreateDefault()
+                .AddService(builder.Environment.ApplicationName));
+    });
 }
 
 // Add services to the container.

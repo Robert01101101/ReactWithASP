@@ -105,6 +105,25 @@ function App() {
         }
     };
 
+    const handleDownloadScan = async (id: string) => {
+        try {
+            const blob = await scanService.downloadScan(id);
+            // Create a URL for the blob
+            const url = window.URL.createObjectURL(blob);
+            // Create a temporary anchor element
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scan-${id}.zip`; // Default filename
+            document.body.appendChild(a);
+            a.click();
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading scan:', error);
+        }
+    };
+
     return (
         <div className="app-container">
             <div className="modules-wrapper">
@@ -141,6 +160,7 @@ function App() {
                     <ScanList 
                         scans={scans}
                         onDelete={handleDeleteScan}
+                        onDownload={handleDownloadScan}
                     />
                 </div>
             </div>

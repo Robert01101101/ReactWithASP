@@ -39,17 +39,17 @@ namespace ReactWithASP.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ToDoItem item)
         {
-            _logger.LogInformation("Received POST request with item: {@Item}", item);
+            _logger.LogInformation("Starting todo creation with title: {Title}", item.Title);
             
             try 
             {
                 await _cosmosDbService.AddTodoItemAsync(item);
-                _logger.LogInformation("Successfully added item with ID: {Id}", item.Id);
+                _logger.LogInformation("Successfully created todo item. ID: {Id}, Title: {Title}", item.Id, item.Title);
                 return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding todo item");
+                _logger.LogError(ex, "Error adding todo item with title: {Title}", item.Title);
                 return StatusCode(500, "Error adding todo item");
             }
         }
@@ -59,13 +59,14 @@ namespace ReactWithASP.Server.Controllers
         {
             try 
             {
+                _logger.LogInformation("Starting delete operation for todo with ID: {Id}", id);
                 await _cosmosDbService.DeleteTodoItemAsync(id);
-                _logger.LogInformation("Successfully deleted item with ID: {Id}", id);
+                _logger.LogInformation("Successfully deleted todo with ID: {Id}", id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting todo item");
+                _logger.LogError(ex, "Error deleting todo item with ID: {Id}", id);
                 return StatusCode(500, "Error deleting todo item");
             }
         }

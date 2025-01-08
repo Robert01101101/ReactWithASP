@@ -5,11 +5,13 @@ public interface IBlobStorageService
 {
     Task<string> UploadModelFilesAsync(IFormFileCollection files);
     Task DeleteModelFilesAsync(string blobName);
+    BlobContainerClient ContainerClient { get; }
 }
 
 public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobContainerClient _containerClient;
+    public BlobContainerClient ContainerClient => _containerClient;
     private readonly ILogger<BlobStorageService> _logger;
 
     public BlobStorageService(IConfiguration configuration, ILogger<BlobStorageService> logger)

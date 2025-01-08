@@ -3,9 +3,10 @@ import { Scan } from '../types/Scan';
 interface ScanListProps {
     scans: Scan[];
     onDelete: (id: string) => void;
+    onDownload: (id: string) => void;
 }
 
-export function ScanList({ scans, onDelete }: ScanListProps) {
+export function ScanList({ scans, onDelete, onDownload }: ScanListProps) {
     return (
         <div className="scan-list">
             {scans.map(scan => (
@@ -16,11 +17,16 @@ export function ScanList({ scans, onDelete }: ScanListProps) {
                     </div>
                     <p>{scan.description}</p>
                     {scan.blobUrl && (
-                        <a href={scan.blobUrl} target="_blank" rel="noopener noreferrer">
+                        <button 
+                            onClick={() => onDownload(scan.id)}
+                            className="download-button"
+                        >
                             Download Model Files
-                        </a>
+                        </button>
                     )}
-                    <button onClick={() => onDelete(scan.id)} className="delete-button">Delete</button>
+                    <button onClick={() => onDelete(scan.id)} className="delete-button">
+                        Delete
+                    </button>
                 </div>
             ))}
         </div>

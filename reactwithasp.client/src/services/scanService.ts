@@ -29,5 +29,13 @@ export const scanService = {
         if (!response.ok) {
             throw new Error('Failed to delete scan');
         }
+    },
+
+    async downloadScan(id: string): Promise<Blob> {
+        const response = await fetch(`/api/scan/${id}/download`);
+        if (!response.ok) {
+            throw new Error('Failed to download scan');
+        }
+        return response.blob();
     }
 }; 
