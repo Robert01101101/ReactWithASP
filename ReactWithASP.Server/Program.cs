@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+
 var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder
