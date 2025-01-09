@@ -11,18 +11,22 @@ using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure logging based on environment
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure logging and telemetry
 if (builder.Environment.IsDevelopment())
 {
-    // Development logging configuration
-    builder.Logging
-        .ClearProviders()
-        .AddDebug()
+    // Clear and reconfigure logging for detailed development output
+    builder.Logging.ClearProviders();
+    builder.Logging.AddDebug()
         .AddConsole()
-        .SetMinimumLevel(LogLevel.Debug)
+        .SetMinimumLevel(LogLevel.Trace)
         .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
         .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
-        .AddFilter("ReactWithASP.Server", LogLevel.Debug);
+        .AddFilter("ReactWithASP.Server", LogLevel.Trace);
 
     var loggerFactory = LoggerFactory.Create(builder =>
     {
@@ -33,9 +37,19 @@ if (builder.Environment.IsDevelopment())
     });
 
     var logger = loggerFactory.CreateLogger<Program>();
+
+    // Add environment logging
     logger.LogInformation("=== Environment Information ===");
     logger.LogInformation("Current environment: {Environment}", builder.Environment.EnvironmentName);
+    logger.LogInformation("Is Development: {IsDevelopment}", builder.Environment.IsDevelopment());
     logger.LogInformation("Content Root Path: {ContentRootPath}", builder.Environment.ContentRootPath);
+
+    // Log the configuration source
+    logger.LogInformation("Configuration files:");
+    foreach (var source in builder.Configuration.Sources)
+    {
+        logger.LogInformation("  - {Source}", source);
+    }
 }
 else
 {
@@ -44,8 +58,7 @@ else
         .UseAzureMonitor()
         .WithTracing(tracing =>
         {
-            tracing
-                .AddAspNetCoreInstrumentation()
+            tracing.AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation();
         })
         .WithMetrics(metrics =>
@@ -61,12 +74,7 @@ else
     });
 }
 
-// Add services to the container.
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+// Add services
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddSingleton<ICosmosDbService>(sp =>
 {
@@ -105,19 +113,16 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Always enable Swagger generation
-app.UseSwagger();
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.MapFallbackToFile("/index.html");
 
 app.Run();
