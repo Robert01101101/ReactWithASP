@@ -11,39 +11,35 @@ using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Add logging configuration
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
-// Configure logging and telemetry
+var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder
+        .AddConsole()
+        .AddDebug()
+        .SetMinimumLevel(LogLevel.Information);
+});
+
+var logger = loggerFactory.CreateLogger<Program>();
+
+// Add environment logging
+logger.LogInformation("=== Environment Information ===");
+logger.LogInformation("Current environment: {Environment}", builder.Environment.EnvironmentName);
+logger.LogInformation("Is Development: {IsDevelopment}", builder.Environment.IsDevelopment());
+logger.LogInformation("Content Root Path: {ContentRootPath}", builder.Environment.ContentRootPath);
+
+// Explicitly set environment if needed
 if (builder.Environment.IsDevelopment())
 {
-    // Clear and reconfigure logging for detailed development output
-    builder.Logging.ClearProviders();
-    builder.Logging.AddDebug()
-        .AddConsole()
-        .SetMinimumLevel(LogLevel.Trace)
-        .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
-        .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
-        .AddFilter("ReactWithASP.Server", LogLevel.Trace);
-
-    var loggerFactory = LoggerFactory.Create(builder =>
-    {
-        builder
-            .AddConsole()
-            .AddDebug()
-            .SetMinimumLevel(LogLevel.Information);
-    });
-
-    var logger = loggerFactory.CreateLogger<Program>();
-
-    // Add environment logging
-    logger.LogInformation("=== Environment Information ===");
-    logger.LogInformation("Current environment: {Environment}", builder.Environment.EnvironmentName);
-    logger.LogInformation("Is Development: {IsDevelopment}", builder.Environment.IsDevelopment());
-    logger.LogInformation("Content Root Path: {ContentRootPath}", builder.Environment.ContentRootPath);
-
+    logger.LogInformation("=== Loading Development Configuration ===");
+    builder.Configuration
+        .SetBasePath(builder.Environment.ContentRootPath)
+        .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
+        .AddEnvironmentVariables();
+    
     // Log the configuration source
     logger.LogInformation("Configuration files:");
     foreach (var source in builder.Configuration.Sources)
@@ -51,9 +47,9 @@ if (builder.Environment.IsDevelopment())
         logger.LogInformation("  - {Source}", source);
     }
 }
-else
+else 
 {
-    // Production logging with Azure Monitor Application Insights OpenTelemetry
+    // Production logging with Azure Monitor
     builder.Services.AddOpenTelemetry()
         .UseAzureMonitor()
         .WithTracing(tracing =>
@@ -65,16 +61,14 @@ else
         {
             metrics.AddAspNetCoreInstrumentation();
         });
-
-    builder.Logging.AddOpenTelemetry(options =>
-    {
-        options.SetResourceBuilder(
-            ResourceBuilder.CreateDefault()
-                .AddService(builder.Environment.ApplicationName));
-    });
 }
 
-// Add services
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add other services
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddSingleton<ICosmosDbService>(sp =>
 {
