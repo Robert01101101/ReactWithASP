@@ -1,11 +1,6 @@
 using Microsoft.Azure.Cosmos;
 using ReactWithASP.Server.Services;
 using Microsoft.Extensions.Logging;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
 
 //Config: To run locally, make sure Multiple startup projects is selected under solution properties, with action Start for both
 
@@ -15,7 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-
 var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder
@@ -23,6 +17,15 @@ var loggerFactory = LoggerFactory.Create(builder =>
         .AddDebug()
         .SetMinimumLevel(LogLevel.Information);
 });
+
+/*
+builder.Logging.AddDebug()
+    .AddConsole()
+    .SetMinimumLevel(LogLevel.Trace)
+    .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+    .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
+    .AddFilter("ReactWithASP.Server", LogLevel.Trace);
+*/
 
 var logger = loggerFactory.CreateLogger<Program>();
 
@@ -40,7 +43,7 @@ if (builder.Environment.IsDevelopment())
         .SetBasePath(builder.Environment.ContentRootPath)
         .AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true)
         .AddEnvironmentVariables();
-    
+
     // Log the configuration source
     logger.LogInformation("Configuration files:");
     foreach (var source in builder.Configuration.Sources)
@@ -48,54 +51,39 @@ if (builder.Environment.IsDevelopment())
         logger.LogInformation("  - {Source}", source);
     }
 }
-else 
-{
-    // Production logging with Azure Monitor
-    builder.Services.AddOpenTelemetry()
-        .UseAzureMonitor()
-        .WithTracing(tracing =>
-        {
-            tracing.AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation();
-        })
-        .WithMetrics(metrics =>
-        {
-            metrics.AddAspNetCoreInstrumentation();
-        });
-}
 
 // Add services to the container.
 builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add other services
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddSingleton<ICosmosDbService>(sp =>
 {
     IConfiguration configuration = sp.GetRequiredService<IConfiguration>();
-    var endpointUri = configuration["CosmosDb:EndpointUri"] ?? 
+    var endpointUri = configuration["CosmosDb:EndpointUri"] ??
         throw new InvalidOperationException("CosmosDB EndpointUri not found in configuration");
-    var primaryKey = configuration["CosmosDb:PrimaryKey"] ?? 
+    var primaryKey = configuration["CosmosDb:PrimaryKey"] ??
         throw new InvalidOperationException("CosmosDB PrimaryKey not found in configuration");
-    
+
     var cosmosClient = new CosmosClient(endpointUri, primaryKey);
-    
+
     // Todo database config
-    var todoDatabaseName = configuration["CosmosDb:Databases:Todo:Name"] ?? 
+    var todoDatabaseName = configuration["CosmosDb:Databases:Todo:Name"] ??
         throw new InvalidOperationException("Todo DatabaseName not found in configuration");
-    var todoContainerName = configuration["CosmosDb:Databases:Todo:ContainerName"] ?? 
+    var todoContainerName = configuration["CosmosDb:Databases:Todo:ContainerName"] ??
         throw new InvalidOperationException("Todo ContainerName not found in configuration");
 
     // Scan database config
-    var scanDatabaseName = configuration["CosmosDb:Databases:Scan:Name"] ?? 
+    var scanDatabaseName = configuration["CosmosDb:Databases:Scan:Name"] ??
         throw new InvalidOperationException("Scan DatabaseName not found in configuration");
-    var scanContainerName = configuration["CosmosDb:Databases:Scan:ContainerName"] ?? 
+    var scanContainerName = configuration["CosmosDb:Databases:Scan:ContainerName"] ??
         throw new InvalidOperationException("Scan ContainerName not found in configuration");
-        
+
     return new CosmosDbService(
-        cosmosClient, 
-        todoDatabaseName, 
+        cosmosClient,
+        todoDatabaseName,
         todoContainerName,
         scanDatabaseName,
         scanContainerName,
@@ -116,8 +104,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.MapFallbackToFile("/index.html");
 
 app.Run();
