@@ -6,27 +6,18 @@ using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add logging configuration
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-
-var loggerFactory = LoggerFactory.Create(builder =>
-{
-    builder
-        .AddConsole()
-        .AddDebug()
-        .SetMinimumLevel(LogLevel.Information);
-});
-
-/*
-builder.Logging.AddDebug()
+// Single, consolidated logging configuration
+builder.Logging.ClearProviders()
     .AddConsole()
-    .SetMinimumLevel(LogLevel.Trace)
+    .AddDebug()
+    .AddApplicationInsights()
+    .AddAzureWebAppDiagnostics()
+    .SetMinimumLevel(LogLevel.Information)
     .AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
     .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning)
-    .AddFilter("ReactWithASP.Server", LogLevel.Trace);
-*/
+    .AddFilter("ReactWithASP.Server", LogLevel.Information);
 
+using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 var logger = loggerFactory.CreateLogger<Program>();
 
 // Add environment logging
